@@ -11,8 +11,8 @@ vec2 resolution = vec2(adsk_result_w, adsk_result_h);
 #define volsteps 7
 #define stepsize 1.
 #define tile   02.400
-#define speed  0.00025 
-#define brightness 1.5/pow(float(iterations), 2.60)
+#define speed  0.00025
+#define brightness 1.5/ pow(abs(float(iterations)), 2.60)
 #define darkmatter 0.300
 #define distfading 0.730
 #define saturation 0.850
@@ -34,31 +34,31 @@ void main(void)
 	from+=vec3(time*0.,2.,1.1*1.);
 	from.xz*=rot1;
 	from.xy*=rot2;
-	
+
 	float s=0.1,fade=1.;
 	vec3 v=vec3(0.);
 	for (int r=0; r<volsteps; r++) {
 		vec3 p=from+s*dir*.5;
 		p = abs(vec3(tile)-mod(p,vec3(tile*2.)));
 		float pa,a=pa=0.;
-		for (int i=0; i<iterations; i++) { 
+		for (int i=0; i<iterations; i++) {
 			p=abs(p)/dot(p,p)-formuparam;
 			a+=abs(length(p)-pa);
 			pa=length(p);
 		}
 		float dm=max(0.,darkmatter-a*a*.001);
 		a*=a*a;
-		if (r>6) fade*=1.-dm; 
+		if (r>6) fade*=1.-dm;
 		v+=fade;
-		v+=pow(vec3(s,s,s), vec3(0., 0.6, 0.8)*-0.3)*a*brightness*pow(fade, 4.);
+		v+=pow(abs(vec3(s,s,s)), vec3(0., 0.6, 0.8)*-0.3)*a*brightness*pow(abs(fade), 4.);
 		fade*=distfading;
 		s+=stepsize;
 	}
 
-	// gl_FragColor = vec4(v*.005,1.);	
+	// gl_FragColor = vec4(v*.005,1.);
 	vec4 col = vec4(v*.005,1.);
 	col = clamp (col, 0.0, 1.0);
 	gl_FragColor = col;
-	
-	
+
+
 }

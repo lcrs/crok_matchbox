@@ -1,6 +1,14 @@
 #version 120
-
 // based on http://glsl.herokuapp.com/e#15053.5
+// Hash without Sine
+// Creative Commons Attribution-ShareAlike 4.0 International Public License
+// Created by David Hoskins.
+#define ITERATIONS 4
+// *** Change these to suit your range of random numbers..
+// *** Use this for integer stepped ranges, ie Value-Noise/Perlin noise functions.
+#define HASHSCALE1 .1031
+#define HASHSCALE3 vec3(.1031, .1030, .0973)
+#define HASHSCALE4 vec4(1031, .1030, .0973, .1099)
 
 uniform float adsk_result_w, adsk_result_h;
 vec2 resolution = vec2(adsk_result_w, adsk_result_h);
@@ -13,12 +21,10 @@ uniform vec3 tint, large_tint;
 #define persistence 0.76
 
 // voronoi parameters
-float Type = 1.0; 
+float Type = 1.0;
 int Octaves = 10;
 float Zoom = 25.;
 float Detail = 2.0;
-	
-
 
 float overlay( float s, float d )
 {
@@ -38,6 +44,7 @@ float rand(vec2 co){
 	return fract(sin(seed + dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
+
 float interpolate( float a, float b, float x ) {
 	float f = ( 1.0 - cos( x * PI ) ) * 0.5;
 	return a * ( 1.0 - f ) + b * f;
@@ -49,7 +56,7 @@ float smoothnoise( vec2 co ) {
 	float corners = ( rand( ( co + vec2( stepsize ) ) ) + rand( ( co + vec2( stepsize, -stepsize ) ) ) + rand( ( co + vec2( -stepsize, stepsize ) ) ) + rand( ( co + vec2( -stepsize ) ) ) ) / 16.0;
 	float sides = ( rand( ( co + vec2( stepsize, 0.0 ) ) ) + rand( ( co + vec2( -stepsize, 0.0 ) ) ) + rand( ( co + vec2( 0.0, stepsize ) ) ) + rand( ( co + vec2( 0.0, -stepsize ) ) ) ) / 8.0;
 	float center = rand( co ) / 4.0;
-	
+
 	return corners + sides + center;
 }
 
@@ -58,12 +65,12 @@ float interpolatednoise( vec2 co ) {
 	float frac_x = fract( co.x );
 	float int_y = floor( co.y );
 	float frac_y = fract( co.y );
-	
+
 	float v1 = smoothnoise( vec2( int_x, int_y ) );
 	float v2 = smoothnoise( vec2( int_x + 1.0, int_y ) );
 	float v3 = smoothnoise( vec2( int_x, int_y + 1.0 ) );
 	float v4 = smoothnoise( vec2( int_x + 1.0, int_y + 1.0 ) );
-	
+
 	float i1 = interpolate( v1, v2, frac_x );
 	float i2 = interpolate( v3, v4, frac_x );
 	return interpolate( i1, i2, frac_y );
@@ -71,13 +78,13 @@ float interpolatednoise( vec2 co ) {
 
 float perlinnoise( vec2 co ) {
 	float total = 0.0;
-	
+
 	for( int i = 0; i < octaves; i++ ) {
 		float frequency = pow( 2.0, float( i ) );
-		float amplitude = pow( persistence, float( i ) );
+		float amplitude = pow( abs(persistence), float( i ) );
 		total += interpolatednoise( vec2( co.x * frequency / zoom_small / overall_zoom, co.y * frequency / zoom_small / overall_zoom ) ) * amplitude;
 	}
-	
+
 	return total;
 }
 
@@ -102,12 +109,12 @@ bool  inverse			= mod(t,16.0) >= 8.0;
 float distance_type		= mod(t/16.0,4.0);
 
 
-
 vec2 hash( vec2 p )
 {
     p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
 	return fract(sin(p)*43758.5453);
 }
+
 
 float voronoi( in vec2 x )
 {
@@ -116,8 +123,8 @@ float voronoi( in vec2 x )
 
 	float F1 = 8.0;
 	float F2 = 8.0;
-	
-	
+
+
     for( int j=-1; j<=1; j++ )
     for( int i=-1; i<=1; i++ )
     {
@@ -134,26 +141,26 @@ float voronoi( in vec2 x )
 					distance_type < 4.0 ? max(abs(r.x), abs(r.y)) :	// chebyshev
 					0.0;
 
-		if( d<F1 ) 
-		{ 
-			F2 = F1; 
-			F1 = d; 
+		if( d<F1 )
+		{
+			F2 = F1;
+			F1 = d;
 		}
-		else if( d<F2 ) 
+		else if( d<F2 )
 		{
 			F2 = d;
 		}
     }
-	
-	float c = function < 1.0 ? F1 : 
-			  function < 2.0 ? F2 : 
+
+	float c = function < 1.0 ? F1 :
+			  function < 2.0 ? F2 :
 			  function < 3.0 ? F2-F1 :
-			  function < 4.0 ? (F1+F2)/2.0 : 
+			  function < 4.0 ? (F1+F2)/2.0 :
 			  0.0;
-		
+
 	if( multiply_by_F1 )	c *= F1;
 	if( inverse )			c = 1.0 - c;
-	
+
     return c;
 }
 
@@ -162,7 +169,7 @@ float fbm( in vec2 p )
 	float s = 0.0;
 	float m = 0.0;
 	float a = 0.5;
-	
+
 	for( int i=0; i<Octaves; i++ )
 	{
 		s += a * voronoi(p);
@@ -174,18 +181,18 @@ float fbm( in vec2 p )
 }
 
 
-void main( void ) 
+void main( void )
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - 0.5;
 	float noise = perlinnoise( uv * 100. ) / 4.0;
 	vec3 col = mix(vec3(0.5), vec3(noise), contrast);
 	col =  overlay(col, tint);
-	
+
     vec3 voronoi = vec3(fbm( Zoom / zoom_large * 2.*uv / overall_zoom));
 	//col = mix(large_tint, vec3(voronoi), contrast);
 	voronoi = mix(large_tint, voronoi, large_blend);
 	col = mix(col, overlay(voronoi, col), blend* .2);
-		
-	
+
+
 	gl_FragColor = vec4( col, voronoi );
 }
