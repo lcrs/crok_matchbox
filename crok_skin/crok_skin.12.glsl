@@ -60,9 +60,12 @@ float fn_noise(vec2 p)
 }
 
 // start Simplex3D
-float noise3D(vec3 p)
+float noise3D(vec3 p3)
 {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,128.852))) * 43758.5453)*2.0-1.0;
+	p3  = fract(p3 * .1031);
+    p3 += dot(p3, p3.zyx + 31.32);
+    return fract((p3.x + p3.y) * p3.z)*2.0-1.0;
+	//return fract(sin(dot(p ,vec3(12.9898,78.233,128.852))) * 43758.5453)*2.0-1.0;
 }
 
 float simplex3D(vec3 p)
@@ -207,5 +210,5 @@ void main(void)
 	//col = vec3(pp_noise * p_col + (1.0 - pp_noise) * b_col);
 	col = vec3(sun_noise * s_col + (1.0 - sun_noise) * col);
 
-  gl_FragColor = vec4(col, 1.0);
+  	gl_FragColor = vec4(col, 1.0);
 }

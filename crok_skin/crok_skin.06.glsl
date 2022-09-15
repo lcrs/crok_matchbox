@@ -12,6 +12,7 @@ uniform vec3 base_skin_col;
 
 #define HASHSCALE1 .1031
 #define HASHSCALE3 vec3(.1031, .1030, .0973)
+#define PI 3.14159265
 
 
 vec4 normal( vec4 s, vec4 d )
@@ -87,13 +88,13 @@ vec4 worley( in vec2 x, float w )
         vec2 o = g_hash( n + g );
 
 		// animate
-        o = 0.5 + 0.5*sin( 1.0 + 6.2831*o );
+        o = 0.5 + 0.5*sin( mod(1.0 + 6.2831*o, 2*PI) );
 
         // distance to cell
 		float d = length(g - f + o);
 
         // do the smoth min for colors and distances
-		vec3 col = 0.5 + 0.5*sin( hash(dot(n+g,vec2(50.)))*3. + 2. + vec3(3.));
+		vec3 col = 0.5 + 0.5*sin( mod(hash(dot(n+g,vec2(50.)))*3. + 2. + vec3(3.), 2*PI));
 		float h = smoothstep( 0.0, 1.0, 0.5 + 0.5*(m.x-d)/w );
 
 	    m.x   = mix( m.x,     d, h ) - h*(1.0-h)*w/(1.0+3.0*w); // distance
