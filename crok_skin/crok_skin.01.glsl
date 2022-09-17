@@ -1,4 +1,5 @@
 #version 120
+#extension GL_EXT_gpu_shader4 : enable
 // based on http://glsl.herokuapp.com/e#15053.5
 // Hash without Sine
 // Creative Commons Attribution-ShareAlike 4.0 International Public License
@@ -41,35 +42,14 @@ vec3 overlay( vec3 s, vec3 d )
 }
 
 float rand(vec2 co){
-	// Hash without Sine from https://www.shadertoy.com/view/4djSRW
-	// MIT License...
-	/* Copyright (c)2014 David Hoskins.
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in all
-	copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	SOFTWARE.*/
-	co.y += seed / 100.0;
-    co.x = mod(co.x, 2*PI);
-    co.y = mod(co.y, 2*PI);
-	vec3 p3  = fract(vec3(co.xyx) * .1031 * 163);
-    p3 += dot(p3, p3.yzx + 33.33);
-    return fract((p3.x + p3.y) * p3.z);
+	//return fract(sin(seed + dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+	uvec3 x = uvec3(1000 * (co.x + 10000), 1000 * (co.y + 10000), seed * 1000);
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return 0.3 + 0.4 * vec3(x).x*(1.0/float(0xffffffffu));
 }
-
 
 float interpolate( float a, float b, float x ) {
 	float f = ( 1.0 - cos( x * PI ) ) * 0.5;
@@ -137,9 +117,14 @@ float distance_type		= mod(t/16.0,4.0);
 
 vec2 hash( vec2 p )
 {
-	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yzx+33.33);
-    return fract((p3.xx+p3.yz)*p3.zy);
+	//p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
+	//return fract(sin(p)*43758.5453);
+	uvec3 x = uvec3(1234 * (p.x + 10000), 1000 * (p.y + 12345), 2304 * (p.x + 10000) + 3201 * (p.y + 10000));
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return vec2(0.3) + 0.4 * vec3(x).xy*(1.0/float(0xffffffffu));
 }
 
 

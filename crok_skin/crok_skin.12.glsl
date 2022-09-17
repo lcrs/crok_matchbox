@@ -1,4 +1,5 @@
 #version 120
+#extension GL_EXT_gpu_shader4 : enable
 
 uniform float adsk_result_w, adsk_result_h, adsk_result_frameratio;
 uniform sampler2D adsk_results_pass6, adsk_results_pass9, adsk_results_pass11;
@@ -39,11 +40,13 @@ float bias(float x, float b)
 {
 	return fract(sin(cos(x*12.13)*19.123)*17.321);
 }*/
-float hash(float p)
-{
-	vec3 p3  = fract(vec3(p) * HASHSCALE3);
-    p3 += dot(p3, p3.yzx + 19.19);
-    return fract((p3.x + p3.y) * p3.z);
+float hash(float co){
+	uvec3 x = uvec3(1000 * (co + 10000), 101, 2001);
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return 0.3 + 0.4 * vec3(x).x*(1.0/float(0xffffffffu));
 }
 
 float fn_noise(vec2 p)
@@ -60,12 +63,13 @@ float fn_noise(vec2 p)
 }
 
 // start Simplex3D
-float noise3D(vec3 p3)
-{
-	p3  = fract(p3 * .1031);
-    p3 += dot(p3, p3.zyx + 31.32);
-    return fract((p3.x + p3.y) * p3.z)*2.0-1.0;
-	//return fract(sin(dot(p ,vec3(12.9898,78.233,128.852))) * 43758.5453)*2.0-1.0;
+float noise3D(vec3 co){
+	uvec3 x = uvec3(1000 * (co.x + 10000), 1000 * (co.y + 10000), 1000 * (co.z + 10000));
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return (0.3 + 0.4 * vec3(x).x*(1.0/float(0xffffffffu))) * 2.0 - 1.0;
 }
 
 float simplex3D(vec3 p)

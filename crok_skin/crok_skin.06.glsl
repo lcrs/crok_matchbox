@@ -1,5 +1,5 @@
 #version 120
-
+#extension GL_EXT_gpu_shader4 : enable
 uniform sampler2D adsk_results_pass1, adsk_results_pass2, adsk_results_pass5;
 uniform float adsk_result_w, adsk_result_h, adsk_result_frameratio;
 vec2 resolution = vec2(adsk_result_w, adsk_result_h);
@@ -38,11 +38,13 @@ float hash(float x)
 	return fract(sin(cos(x*12.13)*19.123)*17.321);
 }*/
 
-float hash(float p)
-{
-	vec3 p3  = fract(vec3(p) * HASHSCALE3);
-    p3 += dot(p3, p3.yzx + 19.19);
-    return fract((p3.x + p3.y) * p3.z);
+float hash(float co){
+	uvec3 x = uvec3(1000 * (co + 10000), 101, 2001);
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return 0.3 + 0.4 * vec3(x).x*(1.0/float(0xffffffffu));
 }
 
 float fn_noise(vec2 p)
@@ -67,12 +69,14 @@ vec2 g_hash( vec2 p )
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }*/
 
-vec2 g_hash(vec2 p)
+vec2 g_hash( vec2 p )
 {
-	vec3 p3 = fract(vec3(p.xyx) * HASHSCALE3);
-    p3 += dot(p3, p3.yzx+19.19);
-    return fract((p3.xx+p3.yz)*p3.zy);
-
+	uvec3 x = uvec3(1234 * (p.x + 10000), 1000 * (p.y + 12345), 2304 * (p.x + 10000) + 3201 * (p.y + 10000));
+	unsigned int k = 1664525u;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	x = ((x>>8u)^x.yzx)*k;
+	return vec2(0.3) + 0.4 * vec3(x).xy*(1.0/float(0xffffffffu));
 }
 
 vec4 worley( in vec2 x, float w )
