@@ -1,8 +1,8 @@
 <ShaderNodePreset
   SupportsAdaptiveDegradation="0"
-  Description="
-This shader creates skin type textures.
+  Description="This shader creates skin type textures.
 
+When loading a preset from the menu below the Change Shader button, remember to set a keyframe on the whole node or the changes may be lost when the batch is next loaded!
 
 Setup:
 - Large Detail: large skin texture opacity
