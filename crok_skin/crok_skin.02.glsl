@@ -35,7 +35,6 @@ vec3 overlay( vec3 s, vec3 d )
 }
 
 float rand(vec2 co){
-	//return fract(sin(seed + dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 	uvec3 x = uvec3(1000 * (co.x + 10000), 1000 * (co.y + 10000), som_seed * 1000);
 	unsigned int k = 1664525u;
 	x = ((x>>8u)^x.yzx)*k;
@@ -77,11 +76,10 @@ float interpolatednoise( vec2 co ) {
 
 float perlinnoise( vec2 co ) {
 	float total = 0.0;
-	co.x += 50;
 	for( int i = 0; i < octaves; i++ ) {
 		float frequency = pow( 2.0, float( i ) );
 		float amplitude = pow( abs(persistence), float( i ) );
-		total += interpolatednoise( vec2( co.x * frequency / som_zoom_small / som_overall_zoom, co.y * frequency / som_zoom_small / som_overall_zoom ) ) * amplitude;
+		total += interpolatednoise( vec2( 5*i + co.x * frequency / som_zoom_small / som_overall_zoom, co.y * frequency / som_zoom_small / som_overall_zoom ) ) * amplitude;
 	}
 
 	return total;
@@ -111,14 +109,12 @@ float distance_type		= mod(t/16.0,4.0);
 
 vec2 hash( vec2 p )
 {
-	//p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
-	//return fract(sin(p)*43758.5453);
 	uvec3 x = uvec3(1234 * (p.x + 10000), 1000 * (p.y + 12345), 2304 * (p.x + 10000) + 3201 * (p.y + 10000));
 	unsigned int k = 1664525u;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
-	return vec2(0.3) + 0.4 * vec3(x).xy*(1.0/float(0xffffffffu));
+	return vec3(x).xy*(1.0/float(0xffffffffu));
 }
 
 float voronoi( in vec2 x )

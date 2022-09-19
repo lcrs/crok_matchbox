@@ -214,5 +214,5 @@ void main(void)
 	//col = vec3(pp_noise * p_col + (1.0 - pp_noise) * b_col);
 	col = vec3(sun_noise * s_col + (1.0 - sun_noise) * col);
 
-  	gl_FragColor = vec4(col, 1.0);
+	gl_FragColor = vec4(col, 1.0);
 }

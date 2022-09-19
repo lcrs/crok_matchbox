@@ -38,13 +38,13 @@ float hash(float x)
 	return fract(sin(cos(x*12.13)*19.123)*17.321);
 }*/
 
-float hash(float co){
-	uvec3 x = uvec3(1000 * (co + 10000), 101, 2001);
+float hash(float p){
+	uvec3 x = uvec3(abs(1000*(p+2.249)));
 	unsigned int k = 1664525u;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
-	return 0.3 + 0.4 * vec3(x).x*(1.0/float(0xffffffffu));
+	return vec3(x).x*(1.0/float(0xffffffffu));
 }
 
 float fn_noise(vec2 p)
@@ -69,14 +69,14 @@ vec2 g_hash( vec2 p )
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }*/
 
-vec2 g_hash( vec2 p )
+vec2 g_hash(vec2 p)
 {
-	uvec3 x = uvec3(1234 * (p.x + 10000), 1000 * (p.y + 12345), 2304 * (p.x + 10000) + 3201 * (p.y + 10000));
+	uvec3 x = uvec3(p.x + 4000000, p.y + 4000000, 10010);
 	unsigned int k = 1664525u;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
 	x = ((x>>8u)^x.yzx)*k;
-	return vec2(0.3) + 0.4 * vec3(x).xy*(1.0/float(0xffffffffu));
+	return vec3(x).xy*(1.0/float(0xffffffffu));
 }
 
 vec4 worley( in vec2 x, float w )
